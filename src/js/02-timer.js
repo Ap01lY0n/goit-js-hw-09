@@ -1,9 +1,8 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-// =====================================================
-let currentTime = new Date(); // Текущее время
-let selectedTime; // Selected time
+let currentTime = new Date();
+let selectedTime;
 const refs = {
   inputDate: document.querySelector('#datetime-picker'),
 
@@ -15,10 +14,8 @@ const refs = {
   btn: document.querySelector('button[data-start]'), //Button
 };
 
-// console.log(refs.messageForUser);
-// =====================================================
-refs.btn.disabled = true; //  disable button
-// =====================================================
+refs.btn.disabled = true; 
+
 flatpickr(refs.inputDate, {
   enableTime: true,
   time_24hr: true,
@@ -26,15 +23,11 @@ flatpickr(refs.inputDate, {
   minuteIncrement: 1,
   onClose(selectedDates) {
     console.log(selectedDates[0]);
-
     if (selectedDates[0] <= currentTime) {
-      // refs.hiden.classList.remove('none');
       refs.hiden.classList.remove('hidden');
       refs.hiden.classList.add('visible');
-
       const cansel = setTimeout(() => {
         refs.hiden.classList.add('hidden');
-        // refs.hiden.classList.add('none');
       }, 2000);
     } else {
       refs.btn.disabled = false;
@@ -42,7 +35,6 @@ flatpickr(refs.inputDate, {
     selectedTime = selectedDates[0];
   },
 });
-
 refs.btn.addEventListener('click', () => {
   function pad(value) {
     return String(value).padStart(2, '0');
@@ -52,7 +44,6 @@ refs.btn.addEventListener('click', () => {
     const newTimer = selectedTime - currentTime;
     console.log(newTimer);
     const { days, hours, minutes, seconds } = convertMs(newTimer);
-    // console.log(refs.seconds.textContent);
 
     if (newTimer > 0) {
       refs.days.textContent = days;
@@ -65,19 +56,18 @@ refs.btn.addEventListener('click', () => {
   }, 1000);
 
   function convertMs(ms) {
-    // Number of milliseconds per unit of time
     const second = 1000;
     const minute = second * 60;
     const hour = minute * 60;
     const day = hour * 24;
 
-    // Remaining days
+    // Залишилось днів
     const days = pad(Math.floor(ms / day));
-    // Remaining hours
+    // Залишилось годин
     const hours = pad(Math.floor((ms % day) / hour));
-    // Remaining minutes
+    // Залишилось хвилин
     const minutes = pad(Math.floor(((ms % day) % hour) / minute));
-    // Remaining seconds
+    // Залишилось секунд
     const seconds = pad(Math.floor((((ms % day) % hour) % minute) / second));
     return { days, hours, minutes, seconds };
   }
