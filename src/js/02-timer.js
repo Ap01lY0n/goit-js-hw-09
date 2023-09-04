@@ -1,92 +1,84 @@
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import Notiflix from "notiflix";
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
-// Функція для форматування чисел з передачею ведучих нулів
-function addLeadingZero(value) {
-  return value.toString().padStart(2, '0');
-}
+// =====================================================
+let currentTime = new Date(); // Текущее время
+let selectedTime; // Selected time
+const refs = {
+  inputDate: document.querySelector('#datetime-picker'),
 
-const dateTimePicker = document.getElementById('datetime-picker');
-const startButton = document.querySelector('[data-start]');
+  hiden: document.querySelector('#messege-js'),
+  days: document.querySelector('span[data-days]'),
+  hours: document.querySelector('span[data-hours]'),
+  minutes: document.querySelector('span[data-minutes]'),
+  seconds: document.querySelector('span[data-seconds]'),
+  btn: document.querySelector('button[data-start]'), //Button
+};
 
-// Опції для flatpickr
-const options = {
+// console.log(refs.messageForUser);
+// =====================================================
+refs.btn.disabled = true; //  disable button
+// =====================================================
+flatpickr(refs.inputDate, {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    const selectedDate = selectedDates[0];
-    const currentDate = new Date();
+    console.log(selectedDates[0]);
 
-    if (selectedDate <= currentDate) {
-      Notiflix.Notify.failure('Please choose a date in the future');
-      startButton.disabled = true;
+    if (selectedDates[0] <= currentTime) {
+      // refs.hiden.classList.remove('none');
+      refs.hiden.classList.remove('hidden');
+      refs.hiden.classList.add('visible');
+
+      const cansel = setTimeout(() => {
+        refs.hiden.classList.add('hidden');
+        // refs.hiden.classList.add('none');
+      }, 2000);
     } else {
-      startButton.disabled = false;
+      refs.btn.disabled = false;
     }
+    selectedTime = selectedDates[0];
   },
-};
-
-// Ініціалізуємо flatpickr на полі вводу дати та часу
-const flatpickrInstance = flatpickr(dateTimePicker, options);
-
-const timerFields = {
-  days: document.querySelector('[data-days]'),
-  hours: document.querySelector('[data-hours]'),
-  minutes: document.querySelector('[data-minutes]'),
-  seconds: document.querySelector('[data-seconds]'),
-};
-
-let countdownInterval;
-
-function updateTimerDisplay(days, hours, minutes, seconds) {
-  timerFields.days.textContent = addLeadingZero(days);
-  timerFields.hours.textContent = addLeadingZero(hours);
-  timerFields.minutes.textContent = addLeadingZero(minutes);
-  timerFields.seconds.textContent = addLeadingZero(seconds);
-}
-
-function startCountdown() {
-  const selectedDate = flatpickrInstance.selectedDates[0];
-  const currentDate = new Date();
-  const timeRemaining = selectedDate - currentDate;
-
-  if (timeRemaining <= 0) {
-    clearInterval(countdownInterval);
-    Notiflix.Notify.success('Countdown completed!');
-    return;
-  }
-
-  const { days, hours, minutes, seconds } = convertMs(timeRemaining);
-  updateTimerDisplay(days, hours, minutes, seconds);
-}
-
-startButton.addEventListener('click', () => {
-  const selectedDate = flatpickrInstance.selectedDates[0];
-  const currentDate = new Date();
-
-  if (selectedDate <= currentDate) {
-    Notiflix.Notify.failure('Please choose a date in the future');
-    return;
-  }
-
-  countdownInterval = setInterval(startCountdown, 1000);
-  startButton.disabled = true;
 });
 
-// Функція для конвертації мілісекунд у дні, години, хвилини і секунди
-function convertMs(ms) {
-  const second = 1000;
-  const minute = second * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
+refs.btn.addEventListener('click', () => {
+  function pad(value) {
+    return String(value).padStart(2, '0');
+  }
+  const timerOff = setInterval(() => {
+    let currentTime = new Date();
+    const newTimer = selectedTime - currentTime;
+    console.log(newTimer);
+    const { days, hours, minutes, seconds } = convertMs(newTimer);
+    // console.log(refs.seconds.textContent);
 
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor((ms % hour) / minute);
-  const seconds = Math.floor((ms % minute) / second);
+    if (newTimer > 0) {
+      refs.days.textContent = days;
+      refs.hours.textContent = hours;
+      refs.minutes.textContent = minutes;
+      refs.seconds.textContent = seconds;
+    } else {
+      clearInterval(timerOff);
+    }
+  }, 1000);
 
-  return { days, hours, minutes, seconds };
-}
+  function convertMs(ms) {
+    // Number of milliseconds per unit of time
+    const second = 1000;
+    const minute = second * 60;
+    const hour = minute * 60;
+    const day = hour * 24;
+
+    // Remaining days
+    const days = pad(Math.floor(ms / day));
+    // Remaining hours
+    const hours = pad(Math.floor((ms % day) / hour));
+    // Remaining minutes
+    const minutes = pad(Math.floor(((ms % day) % hour) / minute));
+    // Remaining seconds
+    const seconds = pad(Math.floor((((ms % day) % hour) % minute) / second));
+    return { days, hours, minutes, seconds };
+  }
+});
